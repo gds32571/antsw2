@@ -6,6 +6,8 @@
      Written 29 April 2020 by Gerald Swann
      during the height of the Covid-19 Stay at Home period.
 
+     Make sure you use ATtiny85_SS_Antenna on the ATTiny85
+
      30 April 2020
      Added OTA capability
 
@@ -20,7 +22,10 @@
 
      7 September 2020
      v 1.4 Changed config for 6 ports
-     
+
+     14 Oct 2020
+     v 1.4b Changed text to match the new 2x16 display
+     (removing tiny tiny OLED display)
  **************************************************************/
 
 #include <Arduino.h>
@@ -45,12 +50,17 @@ const char* mqtt_server = "192.168.2.6";
 //********************************
 
 WiFiClient espClient;
+
+// was this
 PubSubClient client(espClient);
+// doesn't work
+//PubSubClient client(mqtt_server, 1883,callback, espClient);
+
 
 const char* ssid = "NETGEARxx";
-const char* password = "xxxxx";
+const char* password = "............";
 
-const char* myVersion = "v1.4";
+const char* myVersion = "v1.4d";
 
 const char* WiFi_hostname = "antsw2";
 const char* host = "antsw2";
@@ -162,43 +172,48 @@ void handleAnt() {
   // local to global
   myAntenna = antenna;
 //  client.publish("antdisp/cmd","oledcmd,clear");
-  client.publish("antdisp/cmd","oled,1,1,Antenna ");
-  client.publish("antdisp/cmd","oled,2,1,Switch  ");
+//  client.publish("antdisp/cmd","lcd,0,1,Antenna Switch  ");
   switch (antenna) {
     case 0:
       sendATTiny("0");
-      client.publish("antdisp/cmd","oled,5,1,Ant disc");
-//      client.publish("antdisp/cmd","oled,6,1,HIGH SWR");
+      client.publish("antdisp/cmd","lcd,1,1,Ant disc        ");
+      client.publish("antdisp/cmd","lcd,2,1,and grounded    ");
       client.publish("antsw2/antenna", "Ant disc" );
       break;
     case 1:
       sendATTiny("1");
-      client.publish("antdisp/cmd","oled,5,1,Ant1 40m");
+      client.publish("antdisp/cmd","lcd,1,0,Ant 1      7 MHz");
+      client.publish("antdisp/cmd","lcd,2,0,40m hori loop   ");
       client.publish("antsw2/antenna", "Ant1 40m" );
       break;
     case 2:
       sendATTiny("2");
-      client.publish("antdisp/cmd","oled,5,1,Ant2 30m");
+      client.publish("antdisp/cmd","lcd,1,0,Ant 2     10 MHz");
+      client.publish("antdisp/cmd","lcd,2,0,30m vert loop   ");
       client.publish("antsw2/antenna", "Ant2 30m" );
       break;
     case 3:
       sendATTiny("3");
-      client.publish("antdisp/cmd","oled,5,1,Ant3 20m");
+      client.publish("antdisp/cmd","lcd,1,0,Ant 3     14 MHz");
+      client.publish("antdisp/cmd","lcd,2,0,20m dipole      ");
       client.publish("antsw2/antenna", "Ant3 20m" );
       break;
     case 4:
       sendATTiny("4");
-      client.publish("antdisp/cmd","oled,5,1,Ant4 15m");
+      client.publish("antdisp/cmd","lcd,1,0,Ant 4     21 MHz");
+      client.publish("antdisp/cmd","lcd,2,0,15m end fed     ");
       client.publish("antsw2/antenna", "Ant4 15m" );
       break;
     case 5:
       sendATTiny("5");
-      client.publish("antdisp/cmd","oled,5,1,Ant5 10m");
+      client.publish("antdisp/cmd","lcd,1,0,Ant 5     28 MHz");
+      client.publish("antdisp/cmd","lcd,2,0,10m dipole      ");
       client.publish("antsw2/antenna", "Ant5 10m" );
       break;
     case 6:
       sendATTiny("6");
-      client.publish("antdisp/cmd","oled,5,1,Ant6 Tun");
+      client.publish("antdisp/cmd","lcd,1,0,Ant 6     18 MHz");
+      client.publish("antdisp/cmd","lcd,2,0,MFJ-1788 loop   ");
       client.publish("antsw2/antenna", "Ant6 Tun" );
       break;
   }
@@ -254,6 +269,7 @@ void reconnect() {
   }
 } // end reconnect
 
+//  I don't think this works
 void callback(char* topic, byte* payload, unsigned int length) {
 
   for (int ii = 0; ii < length; ii++) {
@@ -290,7 +306,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
 }  // end callback
-
 
 void setup(void) {
 
@@ -356,6 +371,9 @@ void setup(void) {
     digitalWrite(myLed, LOW);
     delay(100);
   }
+
+//  client.publish("antdisp/cmd","lcd,1,0,Antsw2 ");
+//  client.publish("antdisp/cmd","lcd,2,0,has started ");
 
   digitalWrite(myLed, HIGH);
 
